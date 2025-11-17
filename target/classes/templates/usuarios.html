@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Playlist - Agregar Usuario</title>
+    <link href="https://fonts.googleapis.com/css2?family=Netflix+Sans:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/styles.css" rel="stylesheet">
+    <link href="/css/user-styles.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="/">🎵 Mi Playlist</a>
+        <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/">Inicio</a>
+                <a class="nav-link active" href="/usuarios">Agregar Usuario</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-md-8">
+                <h2>👥 Usuarios de la Playlist</h2>
+            </div>
+            <div class="col-md-4">
+                <button class="btn btn-success float-end" data-bs-toggle="modal" data-bs-target="#crearUsuarioModal">
+                    ➕ AGREGAR USUARIO
+                </button>
+            </div>
+        </div>
+
+        <div class="row mt-4" id="usuariosContainer">
+            <div class="col-md-6 col-lg-4 mb-4" th:each="usuario : ${usuarios}">
+                <div class="card video-card h-100">
+                    <div class="card-body d-flex flex-column text-center">
+                        <div class="avatar-circle mb-3">${usuario.nombre.charAt(0).toUpperCase()}</div>
+                        <h5 class="card-title video-title" th:text="${usuario.nombre}">Nombre Usuario</h5>
+                        <div class="mt-auto">
+                            <div class="d-flex flex-column gap-2">
+                                <a th:href="'/usuario/' + ${usuario.id}" class="btn btn-primary">
+                                    🎵 VER VIDEOS
+                                </a>
+                            <form th:action="'/usuario/' + ${usuario.id} + '/eliminar'" method="post" class="d-inline" onsubmit="return confirm('¿Estás seguro de que quieres eliminar este usuario?')">
+                                <button type="submit" class="btn btn-danger">
+                                    🗑️ ELIMINAR
+                                </button>
+                            </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mensaje cuando no hay usuarios -->
+        <div class="text-center mt-5" th:if="${#lists.isEmpty(usuarios)}">
+            <h4>🎬 ¡Bienvenido a Mi Playlist!</h4>
+            <p>No hay usuarios registrados aún. Crea tu primer usuario para comenzar a organizar tus playlists favoritas.</p>
+            <div class="mt-4">
+                <button class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#crearUsuarioModal">
+                    🚀 COMENZAR AHORA
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Crear Usuario -->
+    <div class="modal fade" id="crearUsuarioModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Agregar Usuario a la Playlist</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="crearUsuarioForm" th:action="@{/usuario/crear}" method="post">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="nombreUsuario" class="form-label">Nombre del Usuario</label>
+                            <input type="text" class="form-control" id="nombreUsuario" name="nombre" placeholder="Ingresa el nombre del usuario" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">CANCELAR</button>
+                        <button type="submit" class="btn btn-primary">➕ AGREGAR USUARIO</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.getElementById('crearUsuarioForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const nombre = formData.get('nombre');
+
+            fetch('/usuario/crear', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams({ nombre: nombre })
+            })
+            .then(response => {
+                if (response.ok) {
+                    // Close the modal
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('crearUsuarioModal'));
+                    if (modal) {
+                        modal.hide();
+                    }
+                    // Reload the page to show the new user
+                    window.location.reload();
+                } else {
+                    console.error('Error creating user:', response.status);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+    </script>
+</body>
+</html>

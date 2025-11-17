@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Playlist de Videos</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <link href="/css/styles.css" rel="stylesheet">
+    <link href="/css/user-styles.css" rel="stylesheet">
+
+    <style>
+        
+        .title-strong {
+            color: #ff66ff !important;
+            text-shadow: 
+                0 0 10px #ff2bff,
+                0 0 20px #ff2bff,
+                0 0 35px #ff00ff;
+            font-weight: 900 !important;
+            letter-spacing: 1px;
+            font-size: 1.55rem !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">Mi Playlist de Videos</h1>
+
+        <!-- Sección de Usuarios -->
+        <div class="card video-card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <!-- TÍTULO  -->
+                <h5 class="title-strong">Seleccionar Usuario</h5>
+
+                <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#crearUsuarioModal">
+                    ➕ Crear Usuario
+                </button>
+            </div>
+            <div class="card-body">
+                <div class="row" id="usuariosContainer">
+                    <!-- Los usuarios se cargarán dinámicamente -->
+                </div>
+                <div id="usuariosEmpty" class="text-center mt-3">
+                    <p>No hay usuarios registrados. ¡Crea el primero!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Área de Playlist -->
+        <div id="playlistArea" style="display: none;">
+            <div class="card video-card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+
+                    <!-- TÍTULO  -->
+                    <h5 id="playlistTitle" class="title-strong">
+                        Videos de <span id="usuarioNombre"></span>
+                    </h5>
+
+                    <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#agregarVideoModal">
+                        ➕ Agregar Video
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div id="videoList" class="row"></div>
+                    <div id="videoListEmpty" class="text-center mt-3">
+                        <p>Esta playlist está vacía. ¡Agrega el primer video!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Crear Usuario -->
+    <div class="modal fade" id="crearUsuarioModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Crear Nuevo Usuario</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="crearUsuarioForm">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="nombreUsuario" class="form-label">Nombre del Usuario</label>
+                            <input type="text" class="form-control" id="nombreUsuario" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Crear Usuario</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Agregar Video -->
+    <div class="modal fade" id="agregarVideoModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Agregar Video a la Playlist</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="agregarVideoForm">
+                        <div class="mb-3">
+                            <label for="videoName" class="form-label">Nombre del Video</label>
+                            <input type="text" class="form-control" id="videoName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="videoUrl" class="form-label">URL del Video</label>
+                            <input type="url" class="form-control" id="videoUrl" placeholder="https://youtu.be/..." required>
+                            <div class="form-text">Soporta YouTube y Vimeo</div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="agregarVideo()">Agregar Video</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para ver video -->
+    <div class="modal fade" id="videoModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="videoModalTitle"></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="videoEmbed"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/app.js"></script>
+
+    <script>
+        let usuarioSeleccionado = null;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            cargarUsuarios();
+        });
+
+        document.getElementById('crearUsuarioForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const nombre = document.getElementById('nombreUsuario').value;
+
+            fetch('/api/usuarios', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nombre })
+            })
+            .then(response => response.json())
+            .then(() => {
+                bootstrap.Modal.getInstance(document.getElementById('crearUsuarioModal')).hide();
+                document.getElementById('crearUsuarioForm').reset();
+                cargarUsuarios();
+            });
+        });
+
+        function cargarUsuarios() {
+            fetch('/api/usuarios')
+                .then(response => response.json())
+                .then(usuarios => {
+                    const container = document.getElementById('usuariosContainer');
+                    const emptyMsg = document.getElementById('usuariosEmpty');
+
+                    if (usuarios.length === 0) {
+                        container.innerHTML = '';
+                        emptyMsg.style.display = 'block';
+                        return;
+                    }
+
+                    emptyMsg.style.display = 'none';
+                    container.innerHTML = usuarios.map(usuario => `
+                        <div class="col-md-6 col-lg-4 mb-4">
+                            <div class="card video-card h-100">
+                                <div class="card-body d-flex flex-column text-center">
+                                    <div class="avatar-circle mb-3">${usuario.nombre.charAt(0).toUpperCase()}</div>
+                                    <h5 class="card-title video-title">${usuario.nombre}</h5>
+                                    <div class="mt-auto">
+                                        <button class="btn btn-primary" onclick="seleccionarUsuario(${usuario.id}, '${usuario.nombre.replace(/'/g, "\\'")}')">
+                                            🎵 Ver Playlist
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+                });
+        }
+
+        function seleccionarUsuario(id, nombre) {
+            usuarioSeleccionado = id;
+            document.getElementById('usuarioNombre').textContent = nombre;
+            document.getElementById('playlistArea').style.display = 'block';
+            cargarVideosUsuario();
+        }
+
+        function agregarVideo() {
+            if (!usuarioSeleccionado) {
+                alert('Por favor selecciona un usuario primero');
+                return;
+            }
+
+            const nombre = document.getElementById('videoName').value;
+            const url = document.getElementById('videoUrl').value;
+
+            fetch(`/api/usuarios/${usuarioSeleccionado}/videos`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nombre, url })
+            })
+            .then(response => response.json())
+            .then(() => {
+                bootstrap.Modal.getInstance(document.getElementById('agregarVideoModal')).hide();
+                document.getElementById('agregarVideoForm').reset();
+                cargarVideosUsuario();
+            });
+        }
+
+        function cargarVideosUsuario() {
+            if (!usuarioSeleccionado) return;
+
+            fetch(`/api/usuarios/${usuarioSeleccionado}/videos`)
+                .then(response => response.json())
+                .then(videos => {
+                    const container = document.getElementById('videoList');
+                    const emptyMsg = document.getElementById('videoListEmpty');
+
+                    if (videos.length === 0) {
+                        container.innerHTML = '';
+                        emptyMsg.style.display = 'block';
+                        return;
+                    }
+
+                    emptyMsg.style.display = 'none';
+                    container.innerHTML = videos.map(video => `
+                        <div class="col-md-6 col-lg-4 mb-4">
+                            <div class="card video-card h-100">
+                                <div class="card-body d-flex flex-column">
+                                    <h5 class="card-title video-title">${video.nombre}</h5>
+                                    <div class="mt-auto">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span class="likes-count">👍 ${video.likes}</span>
+                                            <button class="btn btn-outline-danger btn-like" onclick="likeVideo(${video.id})" title="Me gusta">👍</button>
+                                        </div>
+                                        ${video.originalViews ? `
+                                            <div class="stats-info mb-2">
+                                                <small class="text-secondary">
+                                                    👁️ ${video.originalViews.toLocaleString()} vistas
+                                                    ${video.originalLikes ? `<br>❤️ ${video.originalLikes.toLocaleString()} likes` : ''}
+                                                </small>
+                                            </div>
+                                        ` : ''}
+                                        <div class="d-flex justify-content-between">
+                                            <button class="btn btn-outline-warning ${video.favorito ? 'favorito' : ''}" onclick="toggleFavorito(${video.id}, this)" title="Favorito">⭐</button>
+                                            <button class="btn btn-outline-primary" onclick="showVideo('${video.nombre.replace(/'/g, "\\'")}', '${video.url.replace(/'/g, "\\'")}')" title="Ver video">▶️</button>
+                                            <button class="btn btn-outline-danger" onclick="deleteVideo(${video.id})" title="Eliminar">🗑️</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+                });
+        }
+
+        function likeVideo(id) {
+            fetch(`/api/videos/${id}/like`, { method: 'POST' })
+                .then(() => cargarVideosUsuario());
+        }
+
+        function toggleFavorito(id) {
+            fetch(`/api/videos/${id}/favorito`, { method: 'POST' })
+                .then(() => cargarVideosUsuario());
+        }
+
+        function deleteVideo(id) {
+            if (confirm('¿Estás seguro de que quieres eliminar este video?')) {
+                fetch(`/api/videos/${id}`, { method: 'DELETE' })
+                    .then(() => cargarVideosUsuario());
+            }
+        }
+
+        function showVideo(nombre, url) {
+            document.getElementById('videoModalTitle').textContent = nombre;
+
+            let embedUrl = url;
+
+            if (url.includes('youtube.com/watch?v=')) {
+                embedUrl = "https://www.youtube.com/embed/" + url.split("v=")[1].split("&")[0];
+            } else if (url.includes("youtu.be/")) {
+                embedUrl = "https://www.youtube.com/embed/" + url.split("youtu.be/")[1];
+            } else if (url.includes("vimeo.com")) {
+                embedUrl = "https://player.vimeo.com/video/" + url.split("vimeo.com/")[1];
+            }
+
+            document.getElementById('videoEmbed').innerHTML =
+                `<iframe width="100%" height="400" src="${embedUrl}" frameborder="0" allowfullscreen></iframe>`;
+
+            new bootstrap.Modal(document.getElementById('videoModal')).show();
+        }
+    </script>
+</body>
+</html>

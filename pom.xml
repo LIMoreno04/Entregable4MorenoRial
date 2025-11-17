@@ -11,6 +11,8 @@
   <properties>
     <java.version>17</java.version>
     <spring.boot.version>3.1.6</spring.boot.version>
+    <maven.compiler.source>17</maven.compiler.source>
+    <maven.compiler.target>17</maven.compiler.target>
   </properties>
 
   <dependencies>
@@ -38,6 +40,13 @@
       <version>${spring.boot.version}</version>
     </dependency>
 
+    <!-- Jackson for JSON serialization -->
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-annotations</artifactId>
+      <version>2.15.3</version>
+    </dependency>
+
     <!-- Tests -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -55,6 +64,5 @@
         <version>${spring.boot.version}</version>
       </plugin>
     </plugins>
-    <testSourceDirectory>src/tests</testSourceDirectory>
   </build>
 </project>

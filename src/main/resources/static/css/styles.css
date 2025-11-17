@@ -1,0 +1,104 @@
+
+body {
+    background: radial-gradient(circle at 20% 20%, #1a000d, #000);
+    color: #fff;
+    font-family: 'Orbitron', sans-serif;
+    margin: 0;
+}
+
+header {
+    background: rgba(10, 0, 5, 0.7);
+    padding: 20px;
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255,0,150,0.25);
+}
+
+.nav-brand {
+    font-size: 28px;
+    color: #ff00c8;
+    text-shadow: 0 0 8px #ff00c8;
+    font-weight: 700;
+}
+
+.container {
+    max-width: 1100px;
+    margin: auto;
+    padding: 25px;
+}
+
+
+.user-name,
+.video-title,
+h1, h2, h3 {
+    color: #ff4dff !important;
+    text-shadow:
+        0 0 6px #ff00d4,
+        0 0 12px #ff00d4;   
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.video-title {
+    font-size: 22px;
+    margin-top: 10px;
+}
+
+
+/* === CARDS === */
+.card {
+    background: rgba(20, 0, 10, 0.75);
+    border: 1px solid rgba(255,0,120,0.3);
+    border-radius: 18px;
+    padding: 25px;
+    transition: 0.4s ease;
+    box-shadow: 0 0 12px rgba(255,0,120,0.15);
+}
+
+.card:hover {
+    transform: translateY(-10px) scale(1.02);
+    box-shadow: 0 0 25px rgba(255,0,120,0.35);
+}
+
+
+/* === BOTONES === */
+.btn {
+    background: linear-gradient(90deg, #ff0048, #8b00ff);
+    padding: 12px 22px;
+    color: #fff;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    text-shadow: 0 0 4px rgba(255,255,255,0.3);
+}
+
+.btn:hover {
+    filter: brightness(1.15);
+}
+
+
+
+.modal-content {
+    background: rgba(20, 0, 10, 0.85) !important;
+    color: #fff;
+    border: 1px solid rgba(255,0,120,0.3);
+    border-radius: 20px;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 0 18px rgba(255,0,120,0.25);
+}
+
+.modal-header {
+    border-bottom: 1px solid rgba(255,0,120,0.25);
+}
+
+.modal-title {
+    color: #ff2aa1 !important;
+    text-shadow: 0 0 6px #ff2aa1;
+}
+
+/* Miniatura del video (YouTube thumbnail) */
+.video-thumbnail {
+    width: 100%;
+    border-radius: 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 0 12px rgba(255,0,120,0.3);
+}

@@ -1,5 +1,6 @@
 package mi_playlist.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 @Entity
@@ -12,6 +13,13 @@ public class VideoModel {
     private String url;
     private int likes;
     private boolean favorito;
+    private Long originalLikes;
+    private Long originalViews;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "usuario_id")
+    @JsonIgnore
+    private UserModel usuario;
 
     // Constructores
     public VideoModel() {}
@@ -20,6 +28,8 @@ public class VideoModel {
         this.url = url;
         this.likes = 0;
         this.favorito = false;
+        this.originalLikes = 0L;
+        this.originalViews = 0L;
     }
 
     // getters y setters
@@ -33,5 +43,11 @@ public class VideoModel {
     public void setLikes(int likes) { this.likes = likes; }
     public boolean isFavorito() { return favorito; }
     public void setFavorito(boolean favorito) { this.favorito = favorito; }
+    public Long getOriginalLikes() { return originalLikes; }
+    public void setOriginalLikes(Long originalLikes) { this.originalLikes = originalLikes; }
+    public Long getOriginalViews() { return originalViews; }
+    public void setOriginalViews(Long originalViews) { this.originalViews = originalViews; }
+    public UserModel getUsuario() { return usuario; }
+    public void setUsuario(UserModel usuario) { this.usuario = usuario; }
 }
 
