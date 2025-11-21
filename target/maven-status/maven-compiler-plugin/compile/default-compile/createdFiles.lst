@@ -1,0 +1,11 @@
+mi_playlist/repository/UserRepository.class
+mi_playlist/model/UserModel.class
+mi_playlist/controller/VideoController$VideoApiController.class
+mi_playlist/MiPlaylistApplication.class
+mi_playlist/controller/UserController.class
+mi_playlist/service/VideoService.class
+mi_playlist/service/UserService.class
+mi_playlist/controller/UserController$UserApiController.class
+mi_playlist/repository/VideoRepository.class
+mi_playlist/controller/VideoController.class
+mi_playlist/model/VideoModel.class
